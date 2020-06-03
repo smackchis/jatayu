@@ -1,13 +1,10 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 import sys
 import time
 from datetime import datetime
 import test_sheet
-import login, click, enter_value
+from test_modules import click, enter_value, login
+
 
 def run_tests(test_id):
     row_no = 3
@@ -22,13 +19,13 @@ def run_tests(test_id):
                     print(datetime.now(),"TestModule:",test_module, "\t TestMethod:", test_variable, "\t test_id:", test_id, "\t test_step:", test_step)
                     if test_module == 'login':
                         time.sleep(3)
-                        getattr(login,test_variable)(driver,test_id,test_step)
+                        getattr(login, test_variable)(driver, test_id, test_step)
                     if test_module == 'enter_value':
                         time.sleep(1)
-                        getattr(enter_value,'SelectElelmentType')(driver,test_id,test_step,test_variable)
+                        getattr(enter_value, 'SelectElelmentType')(driver, test_id, test_step, test_variable)
                     if test_module == 'click':
                         time.sleep(1)
-                        getattr(click,'SelectElelmentType')(driver,test_id,test_step,test_variable)
+                        getattr(click, 'SelectElelmentType')(driver, test_id, test_step, test_variable)
 
             except:
                 print(sys.exc_info())
