@@ -1,5 +1,6 @@
 ## jatayu
 #INTRODUCTION
+
 Automation testing is very complicated and needs some tough both coding and analytical skills.
 jatayu is a technology selenium based framework, with the help of jatayu tester do not have to write any test case.
 jatayu writes test cases and also executes them so there is no need of coding skill to automate. All we need to do is create a matrix of requirements.
