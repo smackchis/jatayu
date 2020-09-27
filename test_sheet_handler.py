@@ -1,4 +1,5 @@
 from openpyxl import *
+from openpyxl.styles import Alignment, PatternFill
 from datetime import *
 import globals
 
@@ -7,10 +8,10 @@ ConfigWB = load_workbook(filename=globals.ConfigPath)
 PathWS = ConfigWB['PATHS']
 EtcWS = ConfigWB['ETC']
 ProjectsWS = ConfigWB['PROJECTS']
-#ProjectPath = PathWS.cell(row=1, column=2).value
-#print(ProjectPath)
+ProjectPath = PathWS.cell(row=1, column=2).value
 TestResultPath = PathWS.cell(row=2, column=2).value
 WaitTime = EtcWS.cell(row=1,column=2).value
+DriverPath = globals.ProjectPath + "etc\\chromedriver.exe"
 wb = load_workbook(filename=globals.test_suite_path)
 ws = wb[globals.test_sheet]
 total_cases = int(str(ws.cell(row=ws.max_row, column=1).value).strip())
@@ -35,6 +36,12 @@ def test_status(test_id,test_step,test_status):
     while row_no <= ws.max_row:
         if str(ws.cell(row=row_no, column=1).value).strip() == str(test_id):
             if str(ws.cell(row=row_no, column=6).value).strip() == str(test_step):
+                if test_status.lower() == 'pass':
+                    ws.cell(row=row_no, column=9).fill = PatternFill(start_color='0000FF00',end_color='0000FF00',fill_type='solid')
+                if test_status.lower() == 'fail':
+                    ws.cell(row=row_no, column=9).fill = PatternFill(start_color='FFFF0000',end_color='FFFF0000',fill_type='solid')
+                if test_status.lower() == 'pending':
+                    ws.cell(row=row_no, column=9).fill = PatternFill(start_color='00FFFF00',end_color='00FFFF00',fill_type='solid')
                 ws.cell(row=row_no, column=9).value = test_status
                 ws.cell(row=row_no, column=10).value = datetime.now()
 
@@ -74,14 +81,16 @@ def WriteTestparameters(test_id,test_step,**kwargs):
     save_test_resut(ws)
 
 def get_element_repo(ElementName):
-    row_no = 3
+    row_no = 2
     end_row  = RepoSheet.max_row
     while row_no <= RepoSheet.max_row:
+
         if ElementName == str(RepoSheet.cell(row=row_no, column=2).value).strip():
             IdentifierType = str(RepoSheet.cell(row=row_no, column=3).value).strip()
             ElementType = str(RepoSheet.cell(row=row_no, column=4).value).strip()
             ElementIdentifier = str(RepoSheet.cell(row=row_no, column=5).value).strip()
             Action = str(RepoSheet.cell(row=row_no, column=6).value).strip()
+            #print(ElementName, IdentifierType, ElementType, ElementIdentifier, Action)
             return IdentifierType, ElementType, ElementIdentifier, Action
         row_no = row_no + 1
 
@@ -95,30 +104,36 @@ def get_expected_result(test_id, test_step):
                 expected_result_values = expected_result.split(' == ')[1]
                 expected_result_variable_list = expected_result_variables.split(';;')
                 expected_values_list = expected_result_values.split(';;')
-                return expected_result_variable_list, expected_values_list
-            #return IdentifierType, ElementType, ElementIdentifier, Action
         row_no = row_no + 1
+    for n in range(0,len(expected_result_variable_list)):
+        expected_result_variable_list[n] = expected_result_variable_list[n].split('||')
+        expected_values_list[n] = expected_values_list[n].split('||')
+    return expected_result_variable_list, expected_values_list
 
 def compare_actual_and_excepted_result(test_id, test_step, expected_result_variable_list, expected_values_list, actual_value_list):
     #print(expected_result_variable_list, expected_values_list, actual_value_list)
-    keywordsargs = ()
     test_result = True
     for n in range(len(expected_result_variable_list)):
-        #print(expected_result_variable_list[n], expected_values_list[n], actual_value_list[n])
         row_no = 3
         while row_no <= ws.max_row:
             if str(ws.cell(row=row_no, column=1).value).strip() == str(test_id):
                 if str(ws.cell(row=row_no, column=6).value).strip() == str(test_step):
-                    ws.cell(row=row_no, column=n+12).value = "ExpectedAndActual " + expected_result_variable_list[n] + ": '" \
-                                                             + expected_values_list[n] +"' and '" + actual_value_list[n] + "'"
+                    print_text = ''
+                    my_test_result = False
+                    ws.cell(row=row_no, column=n+12).fill = PatternFill(start_color='FFFF0000',end_color='FFFF0000',fill_type='solid')
+                    for m in range(0,len(expected_result_variable_list[n])):
+                        print_text = print_text + (expected_result_variable_list[n])[m] + ": EXPECTED= '" + (expected_values_list[n])[m] + "'   ACTUAL= '" + (actual_value_list[n])[m] + "'" +  '     OR' + '\n'
+                        if (expected_values_list[n])[m] == (actual_value_list[n])[m]:
+                            my_test_result = True
+                            ws.cell(row=row_no, column=n+12).fill = PatternFill(start_color='0000FF00',end_color='0000FF00',fill_type='solid')
+                    ws.cell(row=row_no, column=n+12).alignment = Alignment(wrap_text=True)
+                    ws.cell(row=row_no, column=n+12).value = print_text
+                    test_result = my_test_result * test_result
+                    #print(print_text)
 
             elif ws.cell(row=row_no, column=1).value != None and int(str(ws.cell(row=row_no, column=1).value).strip()) > int(test_id):
                 break
             row_no = row_no + 1
-        if expected_values_list[n] == actual_value_list[n]:
-            test_result = test_result * True
-        else:
-            test_result = test_result * False
 
         save_test_resut(ws)
     if test_result:
@@ -128,6 +143,6 @@ def compare_actual_and_excepted_result(test_id, test_step, expected_result_varia
 
 
 def save_test_resut(ws):
-    wb.save(TestResultPath + globals.project + "//" + globals.test_sheet + "_test_result.xlsx")
+    wb.save(str(globals.ProjectPath) + "\\test_suite\\" + str(globals.project) + "\\" + str(globals.test_sheet) + "_test_result.xlsx")
 
 wb.close()

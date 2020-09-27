@@ -1,29 +1,27 @@
-import test_sheet_handler
 from selenium.webdriver.support.select import Select
-import time
 
-def SelectElelmentType(driver,test_id, test_step,test_variable):
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
+class SelectFromDropDown():
 
-    if ElementType == 'id':
-        SelectElementById(driver,test_id, test_step,test_variable)
+    def __init__(self, driver, test_id, test_step, test_data, test_variable, IdentifierType, ElementType, ElementIdentifier, Action):
+        self.driver = driver
+        self.test_id = test_id
+        self.test_step = test_step
+        self.test_data = test_data
+        self.test_variable = test_variable
+        self.IdentifierType = IdentifierType
+        self.ElementType = ElementType
+        self.ElementIdentifier = ElementIdentifier
+        self.Action = Action
 
-    elif ElementType == 'xpath':
-        SelectElementByXpath(driver,test_id, test_step,test_variable)
 
-    elif ElementType == 'name':
-        SelectElementByName(driver,test_id, test_step,test_variable)
+    def SelectElelmentType(self):
 
+        if self.ElementType == 'id':
+            self.driver.find_element_by_id(self.ElementIdentifier+f"/option[text()='{self.test_data}']").click()
 
-def SelectElementById(driver,test_id, test_step,test_variable):
-    pass
-    #IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
-    #driver.find_element_by_id("//select[@name='element_name']/option[text()='option_text']").click(
-    #Select(driver.find_element_by_id(ElementIdentifier)).first_selected_option.text
+        elif self.ElementType == 'xpath':
+            self.driver.find_element_by_xpath(self.ElementIdentifier+f"/option[text()='{self.test_data}']").click()
 
-def SelectElementByXpath(driver,test_id, test_step,test_variable):
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
-    driver.find_element_by_xpath(ElementIdentifier+f"/option[text()='{test_sheet_handler.get_test_data(test_id, test_step)}']").click()
+        elif self.ElementType == 'name':
+            self.driver.find_element_by_name(self.ElementIdentifier+f"/option[text()='{self.test_data}']").click()
 
-def SelectElementByName(driver,test_id, test_step,test_variable):
-    pass

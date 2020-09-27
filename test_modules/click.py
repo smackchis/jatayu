@@ -1,29 +1,24 @@
-import test_sheet_handler
-import time
+class LeftClick():
 
-def SelectElelmentType(driver,test_id, test_step,test_variable):
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
+    def __init__(self, driver,test_id, test_step, test_data, test_variable,IdentifierType, ElementType, ElementIdentifier, Action):
+        self.driver = driver
+        self.test_id = test_id
+        self.test_step = test_step
+        self.test_data = test_data
+        self.test_variable = test_variable
+        self.IdentifierType = IdentifierType
+        self.ElementType = ElementType
+        self.ElementIdentifier = ElementIdentifier
+        self.Action = Action
 
-    if ElementType == 'id':
-        ClickElementById(driver,test_id, test_step,test_variable)
+    def ClickByElement(self):
+        if self.ElementType == 'id':
+            self.driver.find_element_by_id(self.ElementIdentifier).click()
 
-    elif ElementType == 'xpath':
-        ClickElementByXpath(driver,test_id, test_step,test_variable)
+        elif self.ElementType == 'xpath':
+            self.driver.find_element_by_xpath(self.ElementIdentifier).click()
 
-    elif ElementType == 'name':
-        ClickElementByName(driver,test_id, test_step,test_variable)
+        elif self.ElementType == 'name':
+            self.driver.find_element_by_name(self.ElementIdentifier).click()
 
-def ClickElementById(driver,test_id, test_step,test_variable):
-    #time.sleep(2)
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
-    driver.find_element_by_id(ElementIdentifier).click()
-
-def ClickElementByXpath(driver,test_id, test_step,test_variable):
-    #time.sleep(2)
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
-    driver.find_element_by_xpath(ElementIdentifier).click()
-
-def ClickElementByName(driver,test_id, test_step,test_variable):
-    IdentifierType, ElementType, ElementIdentifier, Action = test_sheet_handler.get_element_repo(test_variable)
-    driver.find_element_by_name(ElementIdentifier).click()
 
